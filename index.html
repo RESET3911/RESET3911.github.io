@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ST APPS" />
+  <meta name="theme-color" content="#f5f3ff" />
+  <title>ST APPS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #f5f3ff 0%, #ecfdf5 100%);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header-icon {
+      font-size: 56px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8b5cf6, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 2px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .card:active {
+      transform: scale(0.97);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .card-ringi .card-icon {
+      background: linear-gradient(135deg, #ffe4e6, #fecdd3);
+    }
+
+    .card-wishlist .card-icon {
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    }
+
+    .card-body {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 3px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
+    .card-arrow {
+      color: #d1d5db;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: #d1d5db;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">💑</div>
+    <h1>ST APPS</h1>
+    <p>さくたかはしの家計ツール</p>
+  </div>
+
+  <div class="cards">
+    <a class="card card-ringi" href="https://RESET3911.github.io/RINGI/">
+      <div class="card-icon">📝</div>
+      <div class="card-body">
+        <div class="card-title">RINGI</div>
+        <div class="card-desc">購入申請・承認/否決<br>家計の決裁システム</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </a>
+
+    <a class="card card-wishlist" href="https://RESET3911.github.io/ST_WISHLIST/">
+      <div class="card-icon">🛍️</div>
+      <div class="card-body">
+        <div class="card-title">ST WISHLIST</div>
+        <div class="card-desc">2人の欲しいものリスト<br>RINGIと連携して申請できる</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="footer">さく &amp; たかはし</div>
+
+</body>
+</html>
