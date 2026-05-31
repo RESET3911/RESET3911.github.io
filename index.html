@@ -618,12 +618,6 @@ document.getElementById('userChip').addEventListener('click', () => {
   if (confirm('ユーザーを変更しますか？')) { localStorage.removeItem('sthub_user'); location.reload(); }
 });
 
-if (currentUser) {
-  document.getElementById('userModal').style.display = 'none';
-  document.getElementById('mainPage').style.display = 'block';
-  init();
-}
-
 // ── Notification Center ──────────────────────────────────────────
 const APP_META = {
   ringi:    { emoji:'📝', label:'RINGI' },
@@ -639,6 +633,12 @@ let allNotifs   = [];
 let drawerOpen  = false;
 let activeFilter = 'all';
 let notifUnsub  = null;
+
+if (currentUser) {
+  document.getElementById('userModal').style.display = 'none';
+  document.getElementById('mainPage').style.display = 'block';
+  init();
+}
 
 function myUid() { return currentUser === 'kenshin' ? 'takahashi' : 'saku'; }
 
