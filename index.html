@@ -4,211 +4,1272 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="ST APPS" />
-  <meta name="theme-color" content="#f5f3ff" />
-  <title>ST APPS</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ST HUB" />
+  <meta name="theme-color" content="#080412" />
+  <title>ST HUB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080412;
+      --surface: rgba(255,255,255,0.055);
+      --surface-hover: rgba(255,255,255,0.09);
+      --border: rgba(255,255,255,0.09);
+      --border-bright: rgba(255,255,255,0.18);
+      --text: #f0ecff;
+      --text-2: #8b80aa;
+      --text-3: #4a4360;
+      --purple: #a78bfa;
+      --purple-2: #7c3aed;
+      --emerald: #34d399;
+      --emerald-2: #059669;
+      --rose: #fb7185;
+      --amber: #fbbf24;
+      --font-head: 'Sora', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 22px;
+      --radius-sm: 14px;
+      --radius-xs: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(160deg, #f5f3ff 0%, #ecfdf5 100%);
+      font-family: var(--font-body);
+      background: var(--bg);
       min-height: 100dvh;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+    }
+    .bg-orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #6d28d9, transparent 70%);
+      top: -200px; left: -150px;
+      animation: orbFloat 18s ease-in-out infinite alternate;
+    }
+    .bg-orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #059669, transparent 70%);
+      bottom: -100px; right: -100px;
+      animation: orbFloat 22s ease-in-out infinite alternate-reverse;
+    }
+    .bg-orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, #be185d, transparent 70%);
+      top: 40%; left: 55%;
+      opacity: 0.12;
+      animation: orbFloat 14s ease-in-out infinite alternate;
+    }
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    @keyframes orbFloat {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ── User Select Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
-      -webkit-tap-highlight-color: transparent;
+      padding: 24px;
+      background: rgba(8,4,18,0.96);
+      backdrop-filter: blur(24px);
     }
-
-    .header {
+    .modal-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 40px 28px 32px;
+      max-width: 340px;
+      width: 100%;
       text-align: center;
-      margin-bottom: 40px;
+      animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
     }
-
-    .header-icon {
-      font-size: 56px;
-      line-height: 1;
-      margin-bottom: 12px;
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
-
-    .header h1 {
-      font-size: 28px;
+    .modal-emoji { font-size: 52px; margin-bottom: 20px; display: block; }
+    .modal-title {
+      font-family: var(--font-head);
+      font-size: 22px;
       font-weight: 800;
-      background: linear-gradient(135deg, #8b5cf6, #10b981);
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .modal-sub { font-size: 13px; color: var(--text-2); margin-bottom: 32px; line-height: 1.6; }
+    .modal-btns { display: flex; gap: 12px; }
+    .modal-btn {
+      flex: 1;
+      padding: 16px 12px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: -0.2px;
+    }
+    .modal-btn:active { transform: scale(0.96); }
+    .btn-k {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(124,58,237,0.45);
+    }
+    .btn-r {
+      background: linear-gradient(135deg, #be185d 0%, #e11d48 100%);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(225,29,72,0.4);
+    }
+    .btn-k:hover { box-shadow: 0 6px 32px rgba(124,58,237,0.6); }
+    .btn-r:hover { box-shadow: 0 6px 32px rgba(225,29,72,0.55); }
+
+    /* ── Header ── */
+    .header {
+      padding: 20px 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .header-left {}
+    .greeting {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+    .greeting-highlight {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--emerald) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: -0.5px;
     }
-
-    .header p {
-      font-size: 14px;
-      color: #6b7280;
-      margin-top: 6px;
+    .header-date {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 4px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
     }
-
-    .cards {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      max-width: 360px;
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .user-chip {
+      padding: 7px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
     }
-
-    .card {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      transition: transform 0.15s, box-shadow 0.15s;
-      border: 2px solid transparent;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .card:active {
-      transform: scale(0.97);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
-    }
-
-    .card-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
+    .user-chip:hover { background: var(--surface-hover); color: var(--text); }
+    .icon-btn {
+      position: relative;
+      width: 38px; height: 38px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      flex-shrink: 0;
-    }
-
-    .card-ringi .card-icon {
-      background: linear-gradient(135deg, #ffe4e6, #fecdd3);
-    }
-
-    .card-wishlist .card-icon {
-      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-    }
-
-    .card-hobby .card-icon {
-      background: linear-gradient(135deg, #f5f3ff, #ddd6fe);
-    }
-
-    .card-gantt .card-icon {
-      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    }
-
-    .card-cashflow .card-icon {
-      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-    }
-
-    .card-konomi .card-icon {
-      background: linear-gradient(135deg, #fce7f3, #ede9fe);
-    }
-
-    .card-body {
-      flex: 1;
-    }
-
-    .card-title {
       font-size: 17px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 3px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--surface-hover); }
+    .notif-dot {
+      position: absolute;
+      top: 7px; right: 7px;
+      width: 7px; height: 7px;
+      background: var(--rose);
+      border-radius: 50%;
+      border: 1.5px solid var(--bg);
+      display: none;
     }
 
-    .card-desc {
+    /* ── App Pills ── */
+    .app-row {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      margin-bottom: 28px;
+    }
+    .app-row::-webkit-scrollbar { display: none; }
+    .app-pill {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
       font-size: 12px;
-      color: #9ca3af;
-      line-height: 1.4;
+      font-weight: 600;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .app-pill:hover { background: var(--surface-hover); color: var(--text); border-color: var(--border-bright); }
+    .app-pill:active { transform: scale(0.95); }
+
+    /* ── Section Label ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
     }
 
-    .card-arrow {
-      color: #d1d5db;
-      font-size: 18px;
+    /* ── Widget Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 580px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .span-2 { grid-column: 1 / -1; }
+    }
+
+    /* ── Widget Card ── */
+    .widget {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s, border-color 0.18s;
+    }
+    .widget::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .widget-clickable { cursor: pointer; }
+    .widget-clickable:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+    .widget-clickable:active { transform: scale(0.985); }
+
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .widget-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .widget-link {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: var(--purple);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .widget-link:hover { opacity: 1; }
+
+    /* ── Widget: Money ── */
+    .money-value {
+      font-family: var(--font-head);
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      margin-bottom: 7px;
+    }
+    .money-value.green { color: var(--emerald); }
+    .money-value.orange { color: var(--amber); }
+    .money-value.red { color: var(--rose); }
+
+    .money-delta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 14px;
+    }
+    .delta-up { color: var(--emerald); font-weight: 600; }
+    .delta-dn { color: var(--rose); font-weight: 600; }
+
+    .money-meta {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+    .money-meta-item {
+      flex: 1;
+      text-align: center;
+    }
+    .money-meta-item + .money-meta-item {
+      border-left: 1px solid var(--border);
+    }
+    .meta-label { font-size: 9px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .meta-val { font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--text); }
+
+    /* ── Widget: Badge ── */
+    .badge-row { display: flex; align-items: center; gap: 12px; }
+    .badge-num {
+      font-family: var(--font-head);
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .badge-num.has-items { color: var(--rose); }
+    .badge-num.no-items { color: var(--emerald); }
+    .badge-meta { font-size: 12px; color: var(--text-2); }
+
+    .ringi-preview {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .ringi-preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+    .ringi-preview-amount {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    /* ── Widget: Unpaid ── */
+    .unpaid-value {
+      font-family: var(--font-head);
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--amber);
+      margin-bottom: 4px;
+    }
+    .unpaid-sub { font-size: 12px; color: var(--text-2); margin-bottom: 10px; }
+    .unpaid-oldest {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .unpaid-oldest-date { color: var(--amber); font-weight: 600; }
+
+    /* ── Widget: Calendar ── */
+    .cal-list { display: flex; flex-direction: column; gap: 0; }
+    .cal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .cal-item:first-child { padding-top: 0; }
+    .cal-date-block {
+      width: 38px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .cal-day {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+    .cal-wd {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-3);
+    }
+    .cal-vline {
+      width: 2px;
+      align-self: stretch;
+      background: var(--border);
+      border-radius: 1px;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .cal-body { flex: 1; min-width: 0; }
+    .cal-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cal-who { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+    /* ── Widget: Wish List ── */
+    .wish-list { display: flex; flex-direction: column; gap: 0; }
+    .wish-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .wish-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .wish-item:first-child { padding-top: 0; }
+    .wish-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-xs);
+      background: rgba(167,139,250,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .wish-body { flex: 1; min-width: 0; }
+    .wish-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wish-who { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+    .wish-price {
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--purple);
       flex-shrink: 0;
     }
 
-    .footer {
-      margin-top: 40px;
-      font-size: 12px;
-      color: #d1d5db;
+    /* ── Widget: Konomi ── */
+    .konomi-list { display: flex; flex-direction: column; gap: 0; }
+    .konomi-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .konomi-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .konomi-item:first-child { padding-top: 0; }
+    .konomi-emoji {
+      font-size: 20px;
+      width: 32px;
       text-align: center;
+      flex-shrink: 0;
+    }
+    .konomi-body { flex: 1; min-width: 0; }
+    .konomi-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .konomi-cat { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+    .rating-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      flex-shrink: 0;
+      letter-spacing: 0.2px;
+    }
+    .rating-like    { background: rgba(251,113,133,0.15); color: #fb7185; }
+    .rating-maybe   { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+    .rating-dislike { background: rgba(139,152,170,0.12); color: #8b98aa; }
+    .rating-ng      { background: rgba(239,68,68,0.15);   color: #ef4444; }
+    .rating-cond    { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+    /* ── Widget: Hobby ── */
+    .hobby-total {
+      font-family: var(--font-head);
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .hobby-delta { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
+    .bar-track {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+    }
+    .bar-k {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #7c3aed, #4f46e5);
+      transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .bar-r {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #be185d, #e11d48);
+      transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .bar-legend {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-2);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-dot-k { background: #7c3aed; }
+    .legend-dot-r { background: #be185d; }
+
+    /* ── Empty / Error ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0 8px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 12px;
+      gap: 6px;
+    }
+    .empty-icon { font-size: 24px; opacity: 0.4; }
+    .ok-state {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 0;
+    }
+    .ok-check {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(52,211,153,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--emerald);
+    }
+    .ok-text { font-size: 13px; color: var(--text-2); }
+
+    /* ── Skeleton ── */
+    .skel {
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.04) 100%
+      );
+      background-size: 300% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    .skel-xl  { height: 44px; width: 55%; margin-bottom: 8px; }
+    .skel-lg  { height: 28px; width: 65%; margin-bottom: 8px; }
+    .skel-md  { height: 14px; width: 40%; margin-bottom: 6px; }
+    .skel-sm  { height: 11px; width: 30%; }
+    .skel-bar { height: 8px; width: 100%; margin-top: 16px; }
+    .skel-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .skel-row:last-child { border-bottom: none; }
+    .skel-circle { width: 34px; height: 34px; border-radius: var(--radius-xs); flex-shrink: 0; }
+    .skel-lines { flex: 1; }
+
+    /* ── Stagger animation ── */
+    .widget {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .widget:nth-child(1) { animation-delay: 0.05s; }
+    .widget:nth-child(2) { animation-delay: 0.10s; }
+    .widget:nth-child(3) { animation-delay: 0.15s; }
+    .widget:nth-child(4) { animation-delay: 0.20s; }
+    .widget:nth-child(5) { animation-delay: 0.25s; }
+    .widget:nth-child(6) { animation-delay: 0.30s; }
+    .widget:nth-child(7) { animation-delay: 0.35s; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 36px;
+      font-size: 11px;
+      color: var(--text-3);
+      letter-spacing: 0.3px;
     }
   </style>
 </head>
 <body>
 
+<div class="bg-canvas">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- ── User Select Modal ── -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-card">
+    <span class="modal-emoji">💑</span>
+    <div class="modal-title">あなたはどっち？</div>
+    <div class="modal-sub">一度選ぶと次回から自動でログインされます</div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-k" onclick="selectUser('kenshin')">けんしん</button>
+      <button class="modal-btn btn-r" onclick="selectUser('rena')">れな</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="page" id="mainPage" style="display:none">
+
+  <!-- Header -->
   <div class="header">
-    <div class="header-icon">💑</div>
-    <h1>ST APPS</h1>
-    <p>さくたかはしの家計ツール</p>
+    <div class="header-left">
+      <div class="greeting" id="greeting">
+        <span class="greeting-highlight">おはよう</span>！
+      </div>
+      <div class="header-date" id="dateStr"></div>
+    </div>
+    <div class="header-actions">
+      <span class="user-chip" id="userChip" title="クリックでユーザー変更"></span>
+      <a class="icon-btn" href="https://RESET3911.github.io/RINGI/" title="RINGI">
+        🔔
+        <span class="notif-dot" id="notifDot"></span>
+      </a>
+    </div>
   </div>
 
-  <div class="cards">
-    <a class="card card-ringi" href="https://RESET3911.github.io/RINGI/">
-      <div class="card-icon">📝</div>
-      <div class="card-body">
-        <div class="card-title">RINGI</div>
-        <div class="card-desc">購入申請・承認/否決<br>家計の決裁システム</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-
-    <a class="card card-wishlist" href="https://RESET3911.github.io/ST_WISHLIST/">
-      <div class="card-icon">🛍️</div>
-      <div class="card-body">
-        <div class="card-title">ST WISHLIST</div>
-        <div class="card-desc">2人の欲しいものリスト<br>RINGIと連携して申請できる</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-
-    <a class="card card-hobby" href="https://RESET3911.github.io/HOBBY_LEDGER/">
-      <div class="card-icon">📒</div>
-      <div class="card-body">
-        <div class="card-title">Hobby Ledger</div>
-        <div class="card-desc">趣味の活動・支出を記録<br>月別グラフで2人の趣味を可視化</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-
-    <a class="card card-gantt" href="https://gantt-tau.vercel.app/">
-      <div class="card-icon">📊</div>
-      <div class="card-body">
-        <div class="card-title">Gantt Scheduler</div>
-        <div class="card-desc">スケジュール・ガントチャート<br>タスク管理・Googleカレンダー連携</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-
-    <a class="card card-cashflow" href="https://RESET3911.github.io/CASHFLOW/">
-      <div class="card-icon">💰</div>
-      <div class="card-body">
-        <div class="card-title">CASHFLOW</div>
-        <div class="card-desc">フリーランス収支・税金管理<br>月別グラフで手取りを可視化</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-
-    <a class="card card-konomi" href="https://RESET3911.github.io/KONOMI/">
-      <div class="card-icon">💝</div>
-      <div class="card-body">
-        <div class="card-title">Konomi</div>
-        <div class="card-desc">好みの相性データベース<br>好き・苦手・NG・条件付きを管理</div>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
+  <!-- App Pills -->
+  <div class="section-label">アプリ</div>
+  <div class="app-row">
+    <a class="app-pill" href="https://RESET3911.github.io/RINGI/">📝 RINGI</a>
+    <a class="app-pill" href="https://RESET3911.github.io/CASHFLOW/">💰 CASHFLOW</a>
+    <a class="app-pill" href="https://RESET3911.github.io/ST_WISHLIST/">🛍️ WISHLIST</a>
+    <a class="app-pill" href="https://RESET3911.github.io/HOBBY_LEDGER/">📒 Hobby</a>
+    <a class="app-pill" href="https://RESET3911.github.io/KONOMI/">💝 Konomi</a>
+    <a class="app-pill" href="https://gantt-tau.vercel.app/">📊 Gantt</a>
   </div>
 
-  <div class="footer">さく &amp; たかはし</div>
+  <!-- Dashboard -->
+  <div class="section-label">ダッシュボード</div>
+  <div class="grid" id="grid">
 
+    <!-- W1: 今月の使えるお金 -->
+    <div class="widget span-2" id="w1">
+      <div class="widget-header">
+        <span class="widget-label">💴 今月の使えるお金</span>
+        <a class="widget-link" href="https://RESET3911.github.io/CASHFLOW/" onclick="event.stopPropagation()">CASHFLOW →</a>
+      </div>
+      <div id="w1-body">
+        <div class="skel skel-xl"></div>
+        <div class="skel skel-md"></div>
+        <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;display:flex;gap:0">
+          <div style="flex:1;text-align:center"><div class="skel skel-sm" style="margin:0 auto 4px"></div><div class="skel" style="height:13px;width:50%;margin:0 auto"></div></div>
+          <div style="flex:1;text-align:center;border-left:1px solid var(--border)"><div class="skel skel-sm" style="margin:0 auto 4px"></div><div class="skel" style="height:13px;width:50%;margin:0 auto"></div></div>
+          <div style="flex:1;text-align:center;border-left:1px solid var(--border)"><div class="skel skel-sm" style="margin:0 auto 4px"></div><div class="skel" style="height:13px;width:50%;margin:0 auto"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- W2: 決裁待ち -->
+    <div class="widget widget-clickable" id="w2" onclick="location.href='https://RESET3911.github.io/RINGI/'">
+      <div class="widget-header">
+        <span class="widget-label">📝 決裁待ち</span>
+        <a class="widget-link" href="https://RESET3911.github.io/RINGI/" onclick="event.stopPropagation()">RINGI →</a>
+      </div>
+      <div id="w2-body">
+        <div class="skel skel-lg"></div>
+        <div class="skel skel-md"></div>
+      </div>
+    </div>
+
+    <!-- W3: 入金待ち -->
+    <div class="widget widget-clickable" id="w3" onclick="location.href='https://RESET3911.github.io/CASHFLOW/'">
+      <div class="widget-header">
+        <span class="widget-label">💸 入金待ち</span>
+        <a class="widget-link" href="https://RESET3911.github.io/CASHFLOW/" onclick="event.stopPropagation()">CASHFLOW →</a>
+      </div>
+      <div id="w3-body">
+        <div class="skel skel-lg"></div>
+        <div class="skel skel-md"></div>
+      </div>
+    </div>
+
+    <!-- W4: 今週の予定 -->
+    <div class="widget span-2" id="w4">
+      <div class="widget-header">
+        <span class="widget-label">📅 今週の予定</span>
+        <a class="widget-link" href="https://gantt-tau.vercel.app/">カレンダー →</a>
+      </div>
+      <div id="w4-body" class="cal-list">
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md" style="width:55%"></div><div class="skel skel-sm"></div></div></div>
+      </div>
+    </div>
+
+    <!-- W5: 最近の欲しいもの -->
+    <div class="widget widget-clickable" id="w5" onclick="location.href='https://RESET3911.github.io/ST_WISHLIST/'">
+      <div class="widget-header">
+        <span class="widget-label">🛍️ 最近の欲しいもの</span>
+        <a class="widget-link" href="https://RESET3911.github.io/ST_WISHLIST/" onclick="event.stopPropagation()">WISHLIST →</a>
+      </div>
+      <div id="w5-body" class="wish-list">
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row" style="border-bottom:none"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md" style="width:60%"></div><div class="skel skel-sm"></div></div></div>
+      </div>
+    </div>
+
+    <!-- W6: 相手の好みメモ -->
+    <div class="widget widget-clickable" id="w6" onclick="location.href='https://RESET3911.github.io/KONOMI/'">
+      <div class="widget-header">
+        <span class="widget-label">💝 相手の好みメモ</span>
+        <a class="widget-link" href="https://RESET3911.github.io/KONOMI/" onclick="event.stopPropagation()">Konomi →</a>
+      </div>
+      <div id="w6-body" class="konomi-list">
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md"></div><div class="skel skel-sm"></div></div></div>
+        <div class="skel-row" style="border-bottom:none"><div class="skel skel-circle"></div><div class="skel-lines"><div class="skel skel-md" style="width:60%"></div><div class="skel skel-sm"></div></div></div>
+      </div>
+    </div>
+
+    <!-- W7: 趣味支出 -->
+    <div class="widget span-2" id="w7">
+      <div class="widget-header">
+        <span class="widget-label">📒 今月の趣味支出</span>
+        <a class="widget-link" href="https://RESET3911.github.io/HOBBY_LEDGER/">Hobby →</a>
+      </div>
+      <div id="w7-body">
+        <div class="skel skel-xl"></div>
+        <div class="skel skel-md"></div>
+        <div class="skel skel-bar"></div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <div class="footer">さく &amp; たかはし · ST APPS</div>
+</div><!-- /page -->
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD46e6p6Kv_gLkEDtP1YIsaj8eqh_UBtQ4",
+  authDomain: "ringi-1b31a.firebaseapp.com",
+  projectId: "ringi-1b31a",
+  storageBucket: "ringi-1b31a.firebasestorage.app",
+  messagingSenderId: "903432482546",
+  appId: "1:903432482546:web:88186598c98486e514aa6b",
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ── Helpers ──────────────────────────────────────────────────────
+const fmt    = n => '¥' + Math.round(n).toLocaleString('ja-JP');
+const thisYM = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+const prevYM = () => { const d = new Date(); d.setMonth(d.getMonth()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+const docsOf  = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+// ── Tax calc (mirrored from CASHFLOW) ────────────────────────────
+function calcSalaryDeduction(s) {
+  if (s <= 1625000) return 550000;
+  if (s <= 1800000) return Math.floor(s*0.4)-100000;
+  if (s <= 3600000) return Math.floor(s*0.3)+80000;
+  if (s <= 6600000) return Math.floor(s*0.2)+440000;
+  if (s <= 8500000) return Math.floor(s*0.1)+1100000;
+  return 1950000;
+}
+function monthlyTaxProvision({ businessIncome, salaryIncome, pension, nhiPremium }) {
+  if (!businessIncome && !salaryIncome) return 0;
+  const basic = 480000;
+  const salNet = Math.max(0, salaryIncome - calcSalaryDeduction(salaryIncome));
+  const gross  = salNet + businessIncome;
+  const social = pension + nhiPremium;
+  const taxable = Math.max(0, gross - basic - social);
+  const brackets = [
+    {l:1950000,r:0.05,d:0},{l:3300000,r:0.10,d:97500},
+    {l:6950000,r:0.20,d:427500},{l:9000000,r:0.23,d:636000},
+    {l:18000000,r:0.33,d:1536000},{l:40000000,r:0.40,d:2796000},
+    {l:Infinity,r:0.45,d:4796000},
+  ];
+  const b = brackets.find(x => taxable <= x.l);
+  const income = Math.max(0, Math.floor(taxable*b.r) - b.d);
+  const total  = Math.floor(income*1.021) + Math.floor(taxable*0.1) + 5000;
+  return Math.ceil(total/12/1000)*1000;
+}
+
+// ── User state ───────────────────────────────────────────────────
+let currentUser = localStorage.getItem('sthub_user');
+
+window.selectUser = user => {
+  localStorage.setItem('sthub_user', user);
+  currentUser = user;
+  document.getElementById('userModal').style.display = 'none';
+  document.getElementById('mainPage').style.display = 'block';
+  init();
+};
+
+document.getElementById('userChip').addEventListener('click', () => {
+  if (confirm('ユーザーを変更しますか？')) {
+    localStorage.removeItem('sthub_user');
+    location.reload();
+  }
+});
+
+if (currentUser) {
+  document.getElementById('userModal').style.display  = 'none';
+  document.getElementById('mainPage').style.display = 'block';
+  init();
+}
+
+// ── Header setup ─────────────────────────────────────────────────
+function setupHeader() {
+  const name = currentUser === 'kenshin' ? 'けんしん' : 'れな';
+  document.getElementById('userChip').textContent = name;
+
+  const h = new Date().getHours();
+  const greet = h < 4 ? 'おやすみ' : h < 11 ? 'おはよう' : h < 17 ? 'こんにちは' : 'こんばんは';
+  document.getElementById('greeting').innerHTML =
+    `<span class="greeting-highlight">${greet}、${name}</span>！`;
+
+  const d = new Date();
+  const days = ['日','月','火','水','木','金','土'];
+  document.getElementById('dateStr').textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
+}
+
+// ── Main ─────────────────────────────────────────────────────────
+async function init() {
+  setupHeader();
+
+  const ym  = thisYM();
+  const pym = prevYM();
+
+  // Parallel fetch
+  const [
+    r_incomes, r_expenses, r_bizexp, r_tax, r_ringiSettings,
+    r_apps, r_wish, r_konomi, r_logs, r_cal
+  ] = await Promise.allSettled([
+    getDocs(collection(db, 'cashflow_incomes')),
+    getDocs(collection(db, 'cashflow_expenses')),
+    getDocs(collection(db, 'cashflow_business_expenses')),
+    getDoc(doc(db, 'cashflow_settings', 'tax')),
+    getDoc(doc(db, 'ringi', 'settings')),
+    getDocs(collection(db, 'applications')),
+    getDocs(collection(db, 'wishlist')),
+    getDocs(collection(db, 'konomi_items')),
+    getDocs(collection(db, 'hobby_ledger_logs')),
+    getDocs(collection(db, 'st_calendar_events')),
+  ]);
+
+  const get = (r, fallback=[]) => r.status === 'fulfilled' ? docsOf(r.value) : fallback;
+  const getDocData = (r, fallback=null) =>
+    r.status === 'fulfilled' && r.value.exists() ? r.value.data() : fallback;
+
+  const incomes      = get(r_incomes);
+  const expenses     = get(r_expenses);
+  const bizexps      = get(r_bizexp);
+  const taxSettings  = getDocData(r_tax, { salaryIncome:0, pension:203760, nhiPremium:0 });
+  const ringiConf    = getDocData(r_ringiSettings);
+  const apps         = get(r_apps);
+  const wishItems    = get(r_wish);
+  const konomiItems  = get(r_konomi);
+  const hobbyLogs    = get(r_logs);
+  const calEvents    = get(r_cal);
+
+  // Map current user to RINGI A/B
+  let myAB = null;
+  if (ringiConf) {
+    const nameA = (ringiConf.userA?.name || '').toLowerCase();
+    if (currentUser === 'kenshin') {
+      myAB = (nameA.includes('けんしん') || nameA.includes('たかはし') || nameA.includes('kenshin')) ? 'A' : 'B';
+    } else {
+      myAB = (nameA.includes('れな') || nameA.includes('さく') || nameA.includes('rena') || nameA.includes('saku')) ? 'A' : 'B';
+    }
+  }
+
+  // User name resolver for wishlist
+  const resolveWishOwner = owner => {
+    if (!ringiConf) return owner === 'A' ? 'Aさん' : 'Bさん';
+    return owner === 'A' ? (ringiConf.userA?.name || 'Aさん') : (ringiConf.userB?.name || 'Bさん');
+  };
+
+  // Opponent konomi userId
+  const opponentKonomiId = currentUser === 'kenshin' ? 'saku' : 'takahashi';
+
+  // Render all widgets
+  renderW1(incomes, expenses, bizexps, taxSettings, ym, pym);
+  renderW2(apps, myAB);
+  renderW3(incomes);
+  renderW4(calEvents);
+  renderW5(wishItems, resolveWishOwner);
+  renderW6(konomiItems, opponentKonomiId);
+  renderW7(hobbyLogs, ym, pym);
+}
+
+// ── W1: 今月の使えるお金 ─────────────────────────────────────────
+function renderW1(incomes, expenses, bizexps, tax, ym, pym) {
+  const el = document.getElementById('w1-body');
+
+  const calcSurplus = (month) => {
+    const mi = incomes.filter(i => i.invoiceDate?.startsWith(month));
+    const fixed    = mi.filter(i => i.incomeType === 'fixed').reduce((s,i) => s+(i.amount||0), 0);
+    const variable = mi.filter(i => i.incomeType !== 'fixed').reduce((s,i) => s+(i.amount||0)-(i.outsourcingCost||0), 0);
+    const totalInc = fixed + variable;
+    const activeExp = expenses.filter(e => e.isActive).reduce((s,e) => s+(e.amount||0), 0);
+    const biz = bizexps.filter(e => e.date?.startsWith(month)).reduce((s,e) => s+(e.amount||0), 0);
+    const txProv = monthlyTaxProvision({
+      businessIncome: variable * 12,
+      salaryIncome: tax.salaryIncome || 0,
+      pension: tax.pension || 203760,
+      nhiPremium: tax.nhiPremium || 0,
+    });
+    return { totalInc, activeExp, biz, txProv, surplus: totalInc - activeExp - biz - txProv };
+  };
+
+  const now  = calcSurplus(ym);
+  const prev = calcSurplus(pym);
+  const delta = now.surplus - prev.surplus;
+  const col   = now.surplus < 0 ? 'red' : now.surplus < 80000 ? 'orange' : 'green';
+  const dCls  = delta >= 0 ? 'delta-up' : 'delta-dn';
+  const dArrow = delta >= 0 ? '↑' : '↓';
+
+  el.innerHTML = `
+    <div class="money-value ${col}">${fmt(now.surplus)}</div>
+    <div class="money-delta">
+      先月比:&nbsp;<span class="${dCls}">${dArrow}&nbsp;${fmt(Math.abs(delta))}</span>
+    </div>
+    <div class="money-meta">
+      <div class="money-meta-item">
+        <div class="meta-label">収入</div>
+        <div class="meta-val">${fmt(now.totalInc)}</div>
+      </div>
+      <div class="money-meta-item">
+        <div class="meta-label">固定費</div>
+        <div class="meta-val">${fmt(now.activeExp)}</div>
+      </div>
+      <div class="money-meta-item">
+        <div class="meta-label">経費+税積立</div>
+        <div class="meta-val">${fmt(now.biz + now.txProv)}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── W2: 決裁待ち ─────────────────────────────────────────────────
+function renderW2(apps, myAB) {
+  const el = document.getElementById('w2-body');
+  const pending = apps.filter(a => a.status === 'pending');
+  const mine    = myAB ? pending.filter(a => a.applicant !== myAB) : pending;
+
+  if (mine.length > 0) document.getElementById('notifDot').style.display = 'block';
+
+  if (mine.length === 0) {
+    el.innerHTML = `
+      <div class="ok-state">
+        <div class="ok-check">✓</div>
+        <div class="ok-text">決裁待ちはありません</div>
+      </div>`;
+    return;
+  }
+
+  const latest = [...mine].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))[0];
+  el.innerHTML = `
+    <div class="badge-row">
+      <div class="badge-num has-items">${mine.length}</div>
+      <div class="badge-meta">件の承認待ち</div>
+    </div>
+    <div class="ringi-preview">
+      <div class="ringi-preview-title">📋 ${latest.item || '—'}</div>
+      <div class="ringi-preview-amount">${fmt(latest.amount||0)}</div>
+    </div>
+  `;
+}
+
+// ── W3: 入金待ち ─────────────────────────────────────────────────
+function renderW3(incomes) {
+  const el     = document.getElementById('w3-body');
+  const unpaid = incomes.filter(i => !i.isPaid);
+
+  if (unpaid.length === 0) {
+    el.innerHTML = `
+      <div class="ok-state">
+        <div class="ok-check">✓</div>
+        <div class="ok-text">未入金なし</div>
+      </div>`;
+    return;
+  }
+
+  const total  = unpaid.reduce((s,i) => s+(i.amount||0)-(i.outsourcingCost||0), 0);
+  const oldest = [...unpaid].sort((a,b) => (a.invoiceDate||'').localeCompare(b.invoiceDate||''))[0];
+
+  el.innerHTML = `
+    <div class="unpaid-value">${fmt(total)}</div>
+    <div class="unpaid-sub">${unpaid.length}件</div>
+    <div class="unpaid-oldest">
+      最古の請求:&nbsp;<span class="unpaid-oldest-date">${oldest.invoiceDate || '—'}</span>
+    </div>
+  `;
+}
+
+// ── W4: 今週の予定 ───────────────────────────────────────────────
+function renderW4(events) {
+  const el = document.getElementById('w4-body');
+  el.className = 'cal-list';
+
+  const now    = new Date();
+  const tod    = now.toISOString().split('T')[0];
+  const plus7  = new Date(now); plus7.setDate(plus7.getDate()+7);
+  const plus7s = plus7.toISOString().split('T')[0];
+  const wds    = ['日','月','火','水','木','金','土'];
+
+  const week = events
+    .filter(e => e.date >= tod && e.date <= plus7s)
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0,5);
+
+  if (week.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">📅</span>
+        今週の予定はありません
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = week.map(ev => {
+    const d  = new Date(ev.date+'T00:00:00');
+    const wd = wds[d.getDay()];
+    return `
+      <div class="cal-item">
+        <div class="cal-date-block">
+          <div class="cal-day">${d.getDate()}</div>
+          <div class="cal-wd">${wd}</div>
+        </div>
+        <div class="cal-vline"></div>
+        <div class="cal-body">
+          <div class="cal-title">${ev.title || ev.name || '—'}</div>
+          ${ev.assignee ? `<div class="cal-who">${ev.assignee}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── W5: 最近の欲しいもの ─────────────────────────────────────────
+function renderW5(items, resolveName) {
+  const el = document.getElementById('w5-body');
+  el.className = 'wish-list';
+
+  const recent = [...items]
+    .filter(i => i.status !== 'purchased')
+    .sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))
+    .slice(0,3);
+
+  if (recent.length === 0) {
+    el.innerHTML = `<div class="empty-state"><span class="empty-icon">🛍️</span>欲しいものがありません</div>`;
+    return;
+  }
+
+  const catEmoji = {
+    'ファッション':'👗','ガジェット':'💻','インテリア':'🪑',
+    '食・飲み':'🍽️','体験・お出かけ':'🎡','コスメ・ケア':'✨','その他':'📦',
+  };
+
+  el.innerHTML = recent.map(item => `
+    <div class="wish-item">
+      <div class="wish-icon">${catEmoji[item.category] || '🛍️'}</div>
+      <div class="wish-body">
+        <div class="wish-name">${item.name || '—'}</div>
+        <div class="wish-who">${resolveName(item.owner)}</div>
+      </div>
+      <div class="wish-price">${item.price ? fmt(item.price) : '—'}</div>
+    </div>`).join('');
+}
+
+// ── W6: 相手の好みメモ ───────────────────────────────────────────
+function renderW6(items, opponentId) {
+  const el = document.getElementById('w6-body');
+  el.className = 'konomi-list';
+
+  const opponentName = opponentId === 'saku' ? 'れな' : 'けんしん';
+  const recent = items
+    .filter(i => i.userId === opponentId)
+    .sort((a,b) => (b.createdAt||0) - (a.createdAt||0))
+    .slice(0,3);
+
+  if (recent.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">💝</span>
+        ${opponentName}の好みメモがありません
+      </div>`;
+    return;
+  }
+
+  const re = {
+    like:        { emoji:'❤️', cls:'rating-like',    label:'好き' },
+    maybe:       { emoji:'👍', cls:'rating-maybe',   label:'まあ好き' },
+    dislike:     { emoji:'😬', cls:'rating-dislike', label:'苦手' },
+    ng:          { emoji:'🚫', cls:'rating-ng',      label:'NG' },
+    conditional: { emoji:'⚡', cls:'rating-cond',    label:'条件付き' },
+  };
+
+  el.innerHTML = recent.map(item => {
+    const r = re[item.rating] || { emoji:'❓', cls:'rating-dislike', label:'?' };
+    return `
+      <div class="konomi-item">
+        <div class="konomi-emoji">${r.emoji}</div>
+        <div class="konomi-body">
+          <div class="konomi-name">${item.name || '—'}</div>
+          <div class="konomi-cat">${item.category || ''}</div>
+        </div>
+        <span class="rating-pill ${r.cls}">${r.label}</span>
+      </div>`;
+  }).join('');
+}
+
+// ── W7: 趣味支出 ─────────────────────────────────────────────────
+function renderW7(logs, ym, pym) {
+  const el = document.getElementById('w7-body');
+
+  const thisLogs = logs.filter(l => l.date?.startsWith(ym));
+  const prevLogs = logs.filter(l => l.date?.startsWith(pym));
+
+  const kThis = thisLogs.filter(l => l.user === 'けんしん').reduce((s,l) => s+(l.amount||0), 0);
+  const rThis = thisLogs.filter(l => l.user === 'れな').reduce((s,l) => s+(l.amount||0), 0);
+  const total = kThis + rThis;
+  const prevTotal = prevLogs.reduce((s,l) => s+(l.amount||0), 0);
+  const delta = total - prevTotal;
+
+  const kPct = total > 0 ? Math.round(kThis/total*100) : 50;
+  const rPct = 100 - kPct;
+  const dCls  = delta >= 0 ? 'delta-up' : 'delta-dn';
+  const dArrow = delta >= 0 ? '↑' : '↓';
+
+  el.innerHTML = `
+    <div class="hobby-total">${fmt(total)}</div>
+    <div class="hobby-delta">
+      先月比:&nbsp;<span class="${dCls}">${dArrow}&nbsp;${fmt(Math.abs(delta))}</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-k" style="width:${kPct}%"></div>
+      <div class="bar-r" style="width:${rPct}%"></div>
+    </div>
+    <div class="bar-legend">
+      <div class="legend-row">
+        <div class="legend-dot legend-dot-k"></div>
+        けんしん&nbsp;${fmt(kThis)}
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot legend-dot-r"></div>
+        れな&nbsp;${fmt(rThis)}
+      </div>
+    </div>
+  `;
+}
+</script>
 </body>
 </html>
