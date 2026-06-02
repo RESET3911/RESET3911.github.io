@@ -844,11 +844,17 @@ function renderW1(incomes,expenses,bizexps,tax,ym,pym) {
   const calc=m=>{
     const mi=incomes.filter(i=>i.invoiceDate?.startsWith(m));
     const fixed=mi.filter(i=>i.incomeType==='fixed').reduce((s,i)=>s+(i.amount||0),0);
-    const vari=mi.filter(i=>i.incomeType!=='fixed').reduce((s,i)=>s+(i.amount||0)-(i.outsourcingCost||0),0);
-    const activeExp=expenses.filter(e=>e.isActive).reduce((s,e)=>s+(e.amount||0),0);
+    // 売上（グロス）。外注費は経費(bizexps)側で1回だけ控除する
+    const sales=mi.filter(i=>i.incomeType!=='fixed').reduce((s,i)=>s+(i.amount||0),0);
+    const active=expenses.filter(e=>e.isActive);
+    const living=active.filter(e=>e.expenseType!=='business_fixed').reduce((s,e)=>s+(e.amount||0),0);
+    const bizFixed=active.filter(e=>e.expenseType==='business_fixed').reduce((s,e)=>s+(e.amount||0),0);
     const biz=bizexps.filter(e=>e.date?.startsWith(m)).reduce((s,e)=>s+(e.amount||0),0);
-    const txP=monthlyTaxProvision({businessIncome:vari*12,salaryIncome:tax.salaryIncome||0,pension:tax.pension||203760,nhiPremium:tax.nhiPremium||0});
-    return{inc:fixed+vari,exp:activeExp,biz,txP,s:fixed+vari-activeExp-biz-txP};
+    // 純収入 = 売上 − 経費 − 固定経費
+    const netVari=sales-biz-bizFixed;
+    const txP=monthlyTaxProvision({businessIncome:Math.max(0,netVari)*12,salaryIncome:tax.salaryIncome||0,pension:tax.pension||203760,nhiPremium:tax.nhiPremium||0});
+    // 使えるお金 = 純収入 + 固定給 − 生活費 − 税積立
+    return{inc:fixed+sales,exp:living,biz:biz+bizFixed,txP,s:netVari+fixed-living-txP};
   };
   const now=calc(ym),prev=calc(pym),delta=now.s-prev.s;
   const col=now.s<0?'red':now.s<80000?'orange':'green';
