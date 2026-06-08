@@ -504,6 +504,17 @@
       <div id="w3-body"><div class="skel skel-lg"></div><div class="skel skel-md"></div></div>
     </div>
 
+    <div class="widget span-2 widget-clickable" id="w-setsu" onclick="location.href='https://RESET3911.github.io/SETSU/'">
+      <div class="widget-header">
+        <span class="widget-label">🧾 今月の支出</span>
+        <a class="widget-link" href="https://RESET3911.github.io/SETSU/" onclick="event.stopPropagation()">SE.TSU →</a>
+      </div>
+      <div id="w-setsu-body">
+        <div class="skel skel-xl"></div><div class="skel skel-md"></div>
+        <div class="skel" style="height:8px;width:100%;margin-top:16px"></div>
+      </div>
+    </div>
+
     <div class="widget span-2 widget-clickable" id="w4" onclick="location.href='https://RESET3911.github.io/DAYS/'">
       <div class="widget-header">
         <span class="widget-label">📅 今週の予定</span>
@@ -796,7 +807,7 @@ async function init() {
   const ym  = thisYM();
   const pym = prevYM();
 
-  const [r_inc,r_exp,r_biz,r_tax,r_conf,r_apps,r_wish,r_kon,r_logs,r_cal,r_goals,r_savings] = await Promise.allSettled([
+  const [r_inc,r_exp,r_biz,r_tax,r_conf,r_apps,r_wish,r_kon,r_logs,r_cal,r_goals,r_savings,r_stx,r_sbud] = await Promise.allSettled([
     getDocs(collection(db,'cashflow_incomes')),
     getDocs(collection(db,'cashflow_expenses')),
     getDocs(collection(db,'cashflow_business_expenses')),
@@ -809,6 +820,8 @@ async function init() {
     getDocs(collection(db,'st_calendar_events')),
     getDocs(collection(db,'goals')),
     getDoc(doc(db,'cashflow_settings','savings')),
+    getDocs(collection(db,'setsu_transactions')),
+    getDocs(collection(db,'setsu_budgets')),
   ]);
 
   const get = r => r.status==='fulfilled' ? docsOf(r.value) : [];
@@ -826,6 +839,8 @@ async function init() {
   const cal      = get(r_cal);
   const goals    = get(r_goals);
   const savings  = getD(r_savings, {amount:0});
+  const setsuTx  = get(r_stx);
+  const setsuBud = get(r_sbud);
 
   let myAB = null;
   if (ringiConf) {
@@ -850,6 +865,28 @@ async function init() {
   renderW6(konomi,opponentId);
   renderW7(logs,ym,pym);
   renderW8(goals, savings?.amount ?? 0);
+  renderSetsu(setsuTx, setsuBud, ym);
+}
+
+function renderSetsu(txs, budgets, ym) {
+  const el=document.getElementById('w-setsu-body');
+  if(!el) return;
+  const mtx=txs.filter(t=>(t.date||'').startsWith(ym));
+  const exp=mtx.filter(t=>t.type==='expense').reduce((s,t)=>s+(t.amount||0),0);
+  const inc=mtx.filter(t=>t.type==='income').reduce((s,t)=>s+(t.amount||0),0);
+  const bud=budgets.filter(b=>b.scope==='shared').reduce((s,b)=>s+(b.amount||0),0);
+  // 共同精算
+  let pSaku=0,pTaka=0;
+  mtx.filter(t=>t.type==='expense'&&t.scope==='shared').forEach(t=>{ if(t.payer==='saku')pSaku+=(t.amount||0); else pTaka+=(t.amount||0); });
+  const net=Math.round((pSaku-pTaka)/2);
+  const settle = net===0 ? '精算なし' : (net>0 ? `れなちゃん→けんしん ${fmt(net)}` : `けんしん→れなちゃん ${fmt(-net)}`);
+  const pct=bud>0?Math.min(100,Math.round(exp/bud*100)):0;
+  const barCol=pct>=100?'#fb7185':pct>=80?'#fbbf24':'#14b8a6';
+  el.innerHTML=`
+    <div class="money-value" style="color:#0d9488">${fmt(exp)}</div>
+    <div class="money-delta">${bud>0?`予算 ${fmt(bud)} の ${pct}%`:'予算未設定'}${inc>0?`　/　収入 ${fmt(inc)}`:''}</div>
+    ${bud>0?`<div style="height:8px;width:100%;background:#e5e7eb;border-radius:99px;margin-top:14px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${barCol};border-radius:99px"></div></div>`:''}
+    <div class="money-delta" style="margin-top:10px">🤝 ${settle}</div>`;
 }
 
 // ── Widgets ──────────────────────────────────────────────────────
