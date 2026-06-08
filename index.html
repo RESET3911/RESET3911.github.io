@@ -97,8 +97,10 @@
     }
 
     /* ── App Pills ── */
-    .app-row { display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:28px; }
+    .app-row { display:flex;flex-wrap:wrap;gap:7px;padding-bottom:2px;margin-bottom:16px; }
     .app-row::-webkit-scrollbar { display:none; }
+    .app-cat { display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--text-2);margin:0 0 8px 2px; }
+    .app-groups { margin-bottom:24px; }
     .app-pill { flex-shrink:0;display:flex;align-items:center;gap:5px;padding:8px 13px;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:12px;font-weight:600;color:var(--text-2);text-decoration:none;transition:background 0.15s,color 0.15s,border-color 0.15s,transform 0.1s;box-shadow:0 1px 3px rgba(0,0,0,0.05); }
     .app-pill:hover { background:var(--surface-hover);color:var(--text);border-color:var(--border-bright); }
     .app-pill:active { transform:scale(0.95); }
@@ -445,15 +447,27 @@
   </div>
 
   <div class="section-label">アプリ</div>
-  <div class="app-row">
-    <a class="app-pill" href="https://RESET3911.github.io/RINGI/">📝 RINGI</a>
-    <a class="app-pill" href="https://RESET3911.github.io/CASHFLOW/">💰 CASHFLOW</a>
-    <a class="app-pill" href="https://RESET3911.github.io/GOALS/">🎯 GOALS</a>
-    <a class="app-pill" href="https://RESET3911.github.io/DAYS/">📅 DAYS</a>
-    <a class="app-pill" href="https://RESET3911.github.io/ST_WISHLIST/">🛍️ WISHLIST</a>
-    <a class="app-pill" href="https://RESET3911.github.io/HOBBY_LEDGER/">📒 Hobby</a>
-    <a class="app-pill" href="https://RESET3911.github.io/KONOMI/">💝 Konomi</a>
-    <a class="app-pill" href="https://gantt-tau.vercel.app/">📊 Gantt</a>
+  <div class="app-groups">
+    <div class="app-cat">💰 おかね</div>
+    <div class="app-row">
+      <a class="app-pill" href="https://RESET3911.github.io/CASHFLOW/">💰 CASHFLOW</a>
+      <a class="app-pill" href="https://RESET3911.github.io/SETSU/">🧾 SE.TSU</a>
+      <a class="app-pill" href="https://RESET3911.github.io/RINGI/">📝 RINGI</a>
+      <a class="app-pill" href="https://RESET3911.github.io/ST_WISHLIST/">🛍️ WISHLIST</a>
+    </div>
+
+    <div class="app-cat">🗓 よてい・タスク</div>
+    <div class="app-row">
+      <a class="app-pill" href="https://RESET3911.github.io/DAYS/">📅 DAYS</a>
+      <a class="app-pill" href="https://gantt-tau.vercel.app/">📊 Gantt</a>
+      <a class="app-pill" href="https://RESET3911.github.io/GOALS/">🎯 GOALS</a>
+    </div>
+
+    <div class="app-cat">💞 ふたり</div>
+    <div class="app-row">
+      <a class="app-pill" href="https://RESET3911.github.io/KONOMI/">💝 Konomi</a>
+      <a class="app-pill" href="https://RESET3911.github.io/HOBBY_LEDGER/">📒 Hobby</a>
+    </div>
   </div>
 
   <div class="section-label">ダッシュボード</div>
