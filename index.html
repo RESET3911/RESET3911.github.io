@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ST HUB" />
   <meta name="theme-color" content="#7c3aed" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <title>ST HUB</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -277,7 +280,7 @@
 
     /* Drawer handle bar (mobile) */
     .nd-handle { display: flex; justify-content: center; padding: 12px 0 4px; }
-    .nd-handle-bar { width: 36px; height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; }
+    .nd-handle-bar { width: 36px; height: 4px; background: rgba(0,0,0,0.18); border-radius: 2px; }
     @media (min-width: 600px) { .nd-handle { display: none; } }
 
     .nd-head {
@@ -406,8 +409,10 @@
     <button class="nd-tab" data-filter="calendar">📅 カレンダー</button>
     <button class="nd-tab" data-filter="wishlist">🛍️ WISHLIST</button>
     <button class="nd-tab" data-filter="cashflow">💴 CASHFLOW</button>
+    <button class="nd-tab" data-filter="setsu">🧾 SE.TSU</button>
     <button class="nd-tab" data-filter="hobby">📒 趣味</button>
     <button class="nd-tab" data-filter="konomi">💝 Konomi</button>
+    <button class="nd-tab" data-filter="stock">🧺 STOCK</button>
   </div>
   <div class="nd-list" id="ndList">
     <div class="nd-empty">
@@ -417,16 +422,16 @@
   </div>
 </div>
 
-<!-- ── User Select Modal ── -->
-<div class="modal-overlay" id="userModal">
+<!-- ── Login Modal ── -->
+<div class="modal-overlay" id="loginModal" style="display:none">
   <div class="modal-card">
     <span class="modal-emoji">💑</span>
-    <div class="modal-title">あなたはどっち？</div>
-    <div class="modal-sub">一度選ぶと次回から自動でログインされます</div>
+    <div class="modal-title">ST APPS</div>
+    <div class="modal-sub" id="loginSub">ふたり専用アプリです。<br />Googleアカウントでログインしてください。</div>
     <div class="modal-btns">
-      <button class="modal-btn btn-k" onclick="selectUser('kenshin')">けんしん</button>
-      <button class="modal-btn btn-r" onclick="selectUser('rena')">れな</button>
+      <button class="modal-btn btn-k" id="loginBtn">Googleでログイン</button>
     </div>
+    <div id="loginErr" style="font-size:11px;color:#e11d48;margin-top:14px;display:none"></div>
   </div>
 </div>
 
@@ -464,10 +469,12 @@
       <a class="app-pill" href="https://RESET3911.github.io/GOALS/">🎯 GOALS</a>
     </div>
 
-    <div class="app-cat">💞 ふたり</div>
+    <div class="app-cat">💞 ふたり・くらし</div>
     <div class="app-row">
       <a class="app-pill" href="https://RESET3911.github.io/KONOMI/">💝 Konomi</a>
       <a class="app-pill" href="https://RESET3911.github.io/HOBBY_LEDGER/">📒 Hobby</a>
+      <a class="app-pill" href="https://RESET3911.github.io/STOCK/">🧺 STOCK</a>
+      <a class="app-pill" href="help.html">❓ ヘルプ</a>
     </div>
   </div>
 
@@ -581,9 +588,12 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
-  getFirestore, collection, doc, getDocs, getDoc,
-  onSnapshot, updateDoc, deleteDoc, writeBatch,
+  getFirestore, collection, doc, getDocs, getDoc, query, where, orderBy, limit,
+  onSnapshot, updateDoc, writeBatch,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD46e6p6Kv_gLkEDtP1YIsaj8eqh_UBtQ4",
@@ -593,14 +603,33 @@ const firebaseConfig = {
   messagingSenderId: "903432482546",
   appId: "1:903432482546:web:88186598c98486e514aa6b",
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── ユーザー（正規ID: kenshin / rena。ST_SHARED/shared/users.ts と同期）──
+const USERS = {
+  kenshin: { name: 'けんしん' },
+  rena:    { name: 'れなちゃん' },
+};
+const other = u => (u === 'kenshin' ? 'rena' : 'kenshin');
+const EMAIL_TO_USER = {
+  'kenshin39cg@gmail.com':    'kenshin',
+  'kenshincoco911@gmail.com': 'kenshin',
+  'yukiyukiyu0312@gmail.com': 'rena',
+};
 
 // ── Helpers ──────────────────────────────────────────────────────
 const fmt    = n => '¥' + Math.round(n).toLocaleString('ja-JP');
-const thisYM = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-const prevYM = () => { const d=new Date(); d.setMonth(d.getMonth()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-const docsOf  = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
+const pad2   = n => String(n).padStart(2, '0');
+const localDateStr = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const thisYM = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`; };
+const prevYM = () => { const d = new Date(); d.setMonth(d.getMonth()-1); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`; };
+const docsOf = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+// XSS対策: Firestore由来の文字列は必ずこれを通して innerHTML に入れる
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 function relativeTime(ts) {
   const diff = Date.now() - (ts || 0);
@@ -614,6 +643,7 @@ function relativeTime(ts) {
 }
 
 // ── Tax calc ─────────────────────────────────────────────────────
+// ※ CASHFLOW/src/lib/taxCalc.ts のコピー。CASHFLOW側を変えたらここも更新すること。
 function calcSalaryDeduction(s) {
   if (s<=1625000) return 550000;
   if (s<=1800000) return Math.floor(s*0.4)-100000;
@@ -632,19 +662,50 @@ function monthlyTaxProvision({businessIncome,salaryIncome,pension,nhiPremium}) {
   return Math.ceil((Math.floor(income*1.021) + Math.floor(taxable*0.1) + 5000)/12/1000)*1000;
 }
 
-// ── User state ───────────────────────────────────────────────────
-let currentUser = localStorage.getItem('sthub_user');
+// ── Auth ─────────────────────────────────────────────────────────
+let currentUser = null;
+let booted = false;
 
-window.selectUser = user => {
-  localStorage.setItem('sthub_user', user);
-  currentUser = user;
-  document.getElementById('userModal').style.display = 'none';
+const loginModal = document.getElementById('loginModal');
+const loginBtn   = document.getElementById('loginBtn');
+const loginErr   = document.getElementById('loginErr');
+const loginSub   = document.getElementById('loginSub');
+
+loginBtn.addEventListener('click', async () => {
+  loginErr.style.display = 'none';
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    loginErr.textContent = e?.message || 'ログインに失敗しました';
+    loginErr.style.display = 'block';
+  }
+});
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    loginModal.style.display = 'flex';
+    document.getElementById('mainPage').style.display = 'none';
+    return;
+  }
+  const uid = EMAIL_TO_USER[user.email];
+  if (!uid) {
+    loginSub.innerHTML = `このアカウント（${esc(user.email)}）は利用できません。`;
+    loginBtn.textContent = '別のアカウントでログイン';
+    loginBtn.onclick = () => signOut(auth);
+    loginModal.style.display = 'flex';
+    return;
+  }
+  currentUser = uid;
+  localStorage.setItem('st_user', uid); // 各アプリのユーザー選択も自動化
+  loginModal.style.display = 'none';
   document.getElementById('mainPage').style.display = 'block';
-  init();
-};
+  if (!booted) { booted = true; init(); }
+});
 
 document.getElementById('userChip').addEventListener('click', () => {
-  if (confirm('ユーザーを変更しますか？')) { localStorage.removeItem('sthub_user'); location.reload(); }
+  if (confirm('ログアウトしますか？')) { signOut(auth).then(() => location.reload()); }
 });
 
 // ── Notification Center ──────────────────────────────────────────
@@ -652,31 +713,23 @@ const APP_META = {
   ringi:    { emoji:'📝', label:'RINGI' },
   wishlist: { emoji:'🛍️', label:'WISHLIST' },
   cashflow: { emoji:'💴', label:'CASHFLOW' },
+  setsu:    { emoji:'🧾', label:'SE.TSU' },
   calendar: { emoji:'📅', label:'カレンダー' },
   hobby:    { emoji:'📒', label:'Hobby' },
   konomi:   { emoji:'💝', label:'Konomi' },
+  stock:    { emoji:'🧺', label:'STOCK' },
   system:   { emoji:'🔔', label:'システム' },
 };
 
-let allNotifs   = [];
-let drawerOpen  = false;
+let allNotifs    = [];
+let drawerOpen   = false;
 let activeFilter = 'all';
-let notifUnsub  = null;
-
-if (currentUser) {
-  document.getElementById('userModal').style.display = 'none';
-  document.getElementById('mainPage').style.display = 'block';
-  init();
-}
-
-function myUid() { return currentUser === 'kenshin' ? 'takahashi' : 'saku'; }
 
 function startNotifListener() {
-  const uid = myUid();
-  notifUnsub = onSnapshot(collection(db, 'notifications'), snap => {
+  const q = query(collection(db, 'notifications'), where('toUser', 'in', [currentUser, 'both']));
+  onSnapshot(q, snap => {
     allNotifs = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(n => n.toUser === uid || n.toUser === 'both')
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     updateBadge();
     if (drawerOpen) renderNotifList();
@@ -748,14 +801,14 @@ function renderNotifList() {
     const url = n.linkedUrl || '';
     return `
       <div class="nd-item ${isUnread ? 'unread' : 'read'}"
-           data-id="${n.id}" data-url="${url}" onclick="handleNotifTap(event,this)">
+           data-id="${esc(n.id)}" data-url="${esc(url)}" onclick="handleNotifTap(event,this)">
         <div class="nd-item-icon">${meta.emoji}</div>
         <div class="nd-item-main">
           <div class="nd-item-top">
-            <div class="nd-item-title">${n.title || '—'}</div>
+            <div class="nd-item-title">${esc(n.title || '—')}</div>
             <div class="nd-item-time">${relativeTime(n.createdAt)}</div>
           </div>
-          <div class="nd-item-body">${n.body || ''}</div>
+          <div class="nd-item-body">${esc(n.body || '')}</div>
         </div>
         ${isUnread ? '<div class="nd-unread-dot"></div>' : ''}
       </div>`;
@@ -772,7 +825,6 @@ window.handleNotifTap = async (e, el) => {
   if (url) { closeDrawer(); location.href = url; }
 };
 
-// Tab filter
 document.getElementById('ndTabs').addEventListener('click', e => {
   const tab = e.target.closest('.nd-tab');
   if (!tab) return;
@@ -789,51 +841,57 @@ document.getElementById('ndMarkAll').addEventListener('click', markAllRead);
 
 // ── Header ───────────────────────────────────────────────────────
 function setupHeader() {
-  const name = currentUser === 'kenshin' ? 'けんしん' : 'れな';
+  const name = USERS[currentUser].name;
   document.getElementById('userChip').textContent = name;
   const h = new Date().getHours();
   const greet = h<4?'おやすみ':h<11?'おはよう':h<17?'こんにちは':'こんばんは';
   document.getElementById('greeting').innerHTML =
-    `<span class="greeting-highlight">${greet}、${name}</span>！`;
+    `<span class="greeting-highlight">${greet}、${esc(name)}</span>！`;
   const d=new Date(), wds=['日','月','火','水','木','金','土'];
   document.getElementById('dateStr').textContent =
     `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wds[d.getDay()]}）`;
 }
 
 // ── Main init ────────────────────────────────────────────────────
+// 読み取り削減: 全件取得をやめ、必要な期間・条件だけクエリする
 async function init() {
   setupHeader();
   startNotifListener();
 
-  const ym  = thisYM();
-  const pym = prevYM();
+  const ym   = thisYM();
+  const pym  = prevYM();
+  const pymStart = pym + '-01';
+  const today = localDateStr();
+  const p7 = new Date(); p7.setDate(p7.getDate() + 7);
+  const p7s = localDateStr(p7);
 
-  const [r_inc,r_exp,r_biz,r_tax,r_conf,r_apps,r_wish,r_kon,r_logs,r_cal,r_goals,r_savings,r_stx,r_sbud] = await Promise.allSettled([
-    getDocs(collection(db,'cashflow_incomes')),
+  const [r_inc,r_unpaid,r_exp,r_biz,r_tax,r_conf,r_apps,r_wish,r_kon,r_logs,r_cal,r_goals,r_savings,r_stx,r_sbud] = await Promise.allSettled([
+    getDocs(query(collection(db,'cashflow_incomes'), where('invoiceDate','>=',pymStart))),
+    getDocs(query(collection(db,'cashflow_incomes'), where('isPaid','==',false))),
     getDocs(collection(db,'cashflow_expenses')),
-    getDocs(collection(db,'cashflow_business_expenses')),
+    getDocs(query(collection(db,'cashflow_business_expenses'), where('date','>=',pymStart))),
     getDoc(doc(db,'cashflow_settings','tax')),
     getDoc(doc(db,'ringi','settings')),
-    getDocs(collection(db,'applications')),
-    getDocs(collection(db,'wishlist')),
-    getDocs(collection(db,'konomi_items')),
-    getDocs(collection(db,'hobby_ledger_logs')),
-    getDocs(collection(db,'st_calendar_events')),
-    getDocs(collection(db,'goals')),
+    getDocs(query(collection(db,'applications'), where('status','==','pending'))),
+    getDocs(query(collection(db,'wishlist'), orderBy('createdAt','desc'), limit(30))),
+    getDocs(query(collection(db,'konomi_items'), where('userId','==',other(currentUser)))),
+    getDocs(query(collection(db,'hobby_ledger_logs'), where('date','>=',pymStart))),
+    getDocs(query(collection(db,'st_calendar_events'), where('date','>=',today), where('date','<=',p7s))),
+    getDocs(query(collection(db,'goals'), where('status','==','active'))),
     getDoc(doc(db,'cashflow_settings','savings')),
-    getDocs(collection(db,'setsu_transactions')),
+    getDocs(query(collection(db,'setsu_transactions'), where('date','>=',pymStart))),
     getDocs(collection(db,'setsu_budgets')),
   ]);
 
-  const get = r => r.status==='fulfilled' ? docsOf(r.value) : [];
+  const get  = r => r.status==='fulfilled' ? docsOf(r.value) : [];
   const getD = (r,fb=null) => r.status==='fulfilled' && r.value.exists() ? r.value.data() : fb;
 
   const incomes  = get(r_inc);
+  const unpaid   = get(r_unpaid);
   const expenses = get(r_exp);
   const bizexps  = get(r_biz);
   const tax      = getD(r_tax, {salaryIncome:0,pension:203760,nhiPremium:0});
-  const ringiConf= getD(r_conf);
-  const apps     = get(r_apps);
+  const pending  = get(r_apps);
   const wish     = get(r_wish);
   const konomi   = get(r_kon);
   const logs     = get(r_logs);
@@ -843,27 +901,12 @@ async function init() {
   const setsuTx  = get(r_stx);
   const setsuBud = get(r_sbud);
 
-  let myAB = null;
-  if (ringiConf) {
-    const nameA = (ringiConf.userA?.name||'').toLowerCase();
-    myAB = (nameA.includes('けんしん')||nameA.includes('たかはし')||nameA.includes('kenshin')||nameA.includes('takahashi'))
-      ? (currentUser==='kenshin'?'A':'B')
-      : (currentUser==='kenshin'?'B':'A');
-  }
-
-  const resolveOwner = owner => {
-    if (!ringiConf) return owner==='A'?'Aさん':'Bさん';
-    return owner==='A'?(ringiConf.userA?.name||'Aさん'):(ringiConf.userB?.name||'Bさん');
-  };
-
-  const opponentId = currentUser==='kenshin'?'saku':'takahashi';
-
   renderW1(incomes,expenses,bizexps,tax,ym,pym);
-  renderW2(apps,myAB);
-  renderW3(incomes);
+  renderW2(pending);
+  renderW3(unpaid);
   renderW4(cal);
-  renderW5(wish,resolveOwner);
-  renderW6(konomi,opponentId);
+  renderW5(wish);
+  renderW6(konomi);
   renderW7(logs,ym,pym);
   renderW8(goals, savings?.amount ?? 0);
   renderSetsu(setsuTx, setsuBud, ym);
@@ -877,9 +920,9 @@ function renderSetsu(txs, budgets, ym) {
   const inc=mtx.filter(t=>t.type==='income').reduce((s,t)=>s+(t.amount||0),0);
   const bud=budgets.filter(b=>b.scope==='shared').reduce((s,b)=>s+(b.amount||0),0);
   // 共同精算
-  let pSaku=0,pTaka=0;
-  mtx.filter(t=>t.type==='expense'&&t.scope==='shared').forEach(t=>{ if(t.payer==='saku')pSaku+=(t.amount||0); else pTaka+=(t.amount||0); });
-  const net=Math.round((pSaku-pTaka)/2);
+  let pKen=0,pRena=0;
+  mtx.filter(t=>t.type==='expense'&&t.scope==='shared').forEach(t=>{ if(t.payer==='kenshin')pKen+=(t.amount||0); else pRena+=(t.amount||0); });
+  const net=Math.round((pKen-pRena)/2);
   const settle = net===0 ? '精算なし' : (net>0 ? `れなちゃん→けんしん ${fmt(net)}` : `けんしん→れなちゃん ${fmt(-net)}`);
   const pct=bud>0?Math.min(100,Math.round(exp/bud*100)):0;
   const barCol=pct>=100?'#fb7185':pct>=80?'#fbbf24':'#14b8a6';
@@ -921,67 +964,81 @@ function renderW1(incomes,expenses,bizexps,tax,ym,pym) {
     </div>`;
 }
 
-function renderW2(apps,myAB) {
+function renderW2(pending) {
   const el=document.getElementById('w2-body');
-  const pending=apps.filter(a=>a.status==='pending');
-  const mine=myAB?pending.filter(a=>a.applicant!==myAB):pending;
+  const mine=pending.filter(a=>a.applicant!==currentUser);
   if(mine.length===0){el.innerHTML=`<div class="ok-state"><div class="ok-check">✓</div><div class="ok-text">決裁待ちはありません</div></div>`;return;}
   const latest=[...mine].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))[0];
   el.innerHTML=`
     <div class="badge-row"><div class="badge-num has-items">${mine.length}</div><div class="badge-meta">件の承認待ち</div></div>
     <div class="ringi-preview">
-      <div class="ringi-preview-title">📋 ${latest.item||'—'}</div>
+      <div class="ringi-preview-title">📋 ${esc(latest.item||'—')}</div>
       <div class="ringi-preview-amount">${fmt(latest.amount||0)}</div>
     </div>`;
 }
 
-function renderW3(incomes) {
+function renderW3(unpaid) {
   const el=document.getElementById('w3-body');
-  const unpaid=incomes.filter(i=>!i.isPaid);
   if(unpaid.length===0){el.innerHTML=`<div class="ok-state"><div class="ok-check">✓</div><div class="ok-text">未入金なし</div></div>`;return;}
   const total=unpaid.reduce((s,i)=>s+(i.amount||0)-(i.outsourcingCost||0),0);
   const oldest=[...unpaid].sort((a,b)=>(a.invoiceDate||'').localeCompare(b.invoiceDate||''))[0];
   el.innerHTML=`
     <div class="unpaid-value">${fmt(total)}</div>
     <div class="unpaid-sub">${unpaid.length}件</div>
-    <div class="unpaid-oldest">最古の請求:&nbsp;<span class="unpaid-oldest-date">${oldest.invoiceDate||'—'}</span></div>`;
+    <div class="unpaid-oldest">最古の請求:&nbsp;<span class="unpaid-oldest-date">${esc(oldest.invoiceDate||'—')}</span></div>`;
 }
 
 function renderW4(events) {
   const el=document.getElementById('w4-body');el.className='cal-list';
-  const now=new Date(),tod=now.toISOString().split('T')[0];
-  const p7=new Date(now);p7.setDate(p7.getDate()+7);
-  const p7s=p7.toISOString().split('T')[0];
   const wds=['日','月','火','水','木','金','土'];
-  const week=events.filter(e=>e.date>=tod&&e.date<=p7s).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  const week=[...events].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
   if(week.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">📅</span>今週の予定はありません</div>`;return;}
   el.innerHTML=week.map(ev=>{
     const d=new Date(ev.date+'T00:00:00');
-    return `<div class="cal-item"><div class="cal-date-block"><div class="cal-day">${d.getDate()}</div><div class="cal-wd">${wds[d.getDay()]}</div></div><div class="cal-vline"></div><div class="cal-body"><div class="cal-title">${ev.title||ev.name||'—'}</div>${ev.assignee?`<div class="cal-who">${ev.assignee}</div>`:''}</div></div>`;
+    const who=ev.assignee&&USERS[ev.assignee]?USERS[ev.assignee].name:(ev.assignee==='both'?'ふたり':'');
+    return `<div class="cal-item"><div class="cal-date-block"><div class="cal-day">${d.getDate()}</div><div class="cal-wd">${wds[d.getDay()]}</div></div><div class="cal-vline"></div><div class="cal-body"><div class="cal-title">${esc(ev.title||ev.name||'—')}</div>${who?`<div class="cal-who">${esc(who)}</div>`:''}</div></div>`;
   }).join('');
 }
 
-function renderW5(items,resolveName) {
+function renderW5(items) {
   const el=document.getElementById('w5-body');el.className='wish-list';
   const catEmoji={'ファッション':'👗','ガジェット':'💻','インテリア':'🪑','食・飲み':'🍽️','体験・お出かけ':'🎡','コスメ・ケア':'✨','その他':'📦'};
-  const recent=[...items].filter(i=>i.status!=='purchased').sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,3);
+  const recent=[...items].filter(i=>i.status!=='purchased').slice(0,3);
   if(recent.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">🛍️</span>欲しいものがありません</div>`;return;}
   el.innerHTML=recent.map(i=>`
     <div class="wish-item">
       <div class="wish-icon">${catEmoji[i.category]||'🛍️'}</div>
-      <div class="wish-body"><div class="wish-name">${i.name||'—'}</div><div class="wish-who">${resolveName(i.owner)}</div></div>
+      <div class="wish-body"><div class="wish-name">${esc(i.name||'—')}</div><div class="wish-who">${esc(USERS[i.owner]?.name||'')}</div></div>
       <div class="wish-price">${i.price?fmt(i.price):'—'}</div>
     </div>`).join('');
 }
 
-function renderW6(items,opponentId) {
+function renderW6(items) {
   const el=document.getElementById('w6-body');el.className='konomi-list';
-  const opName=opponentId==='saku'?'れな':'けんしん';
-  const recent=items.filter(i=>i.userId===opponentId).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,3);
-  if(recent.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">💝</span>${opName}の好みメモがありません</div>`;return;}
+  const opName=USERS[other(currentUser)].name;
+  const recent=[...items].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,3);
+  if(recent.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">💝</span>${esc(opName)}の好みメモがありません</div>`;return;}
   const re={like:{e:'❤️',c:'rating-like',l:'好き'},maybe:{e:'👍',c:'rating-maybe',l:'まあ好き'},dislike:{e:'😬',c:'rating-dislike',l:'苦手'},ng:{e:'🚫',c:'rating-ng',l:'NG'},conditional:{e:'⚡',c:'rating-cond',l:'条件付き'}};
   el.innerHTML=recent.map(i=>{const r=re[i.rating]||{e:'❓',c:'rating-dislike',l:'?'};return`
-    <div class="konomi-item"><div class="konomi-emoji">${r.e}</div><div class="konomi-body"><div class="konomi-name">${i.name||'—'}</div><div class="konomi-cat">${i.category||''}</div></div><span class="rating-pill ${r.c}">${r.l}</span></div>`;}).join('');
+    <div class="konomi-item"><div class="konomi-emoji">${r.e}</div><div class="konomi-body"><div class="konomi-name">${esc(i.name||'—')}</div><div class="konomi-cat">${esc(i.category||'')}</div></div><span class="rating-pill ${r.c}">${r.l}</span></div>`;}).join('');
+}
+
+function renderW7(logs,ym,pym) {
+  const el=document.getElementById('w7-body');
+  const tl=logs.filter(l=>l.date?.startsWith(ym)),pl=logs.filter(l=>l.date?.startsWith(pym));
+  const kT=tl.filter(l=>l.user==='kenshin').reduce((s,l)=>s+(l.amount||0),0);
+  const rT=tl.filter(l=>l.user==='rena').reduce((s,l)=>s+(l.amount||0),0);
+  const total=kT+rT,prev=pl.reduce((s,l)=>s+(l.amount||0),0),delta=total-prev;
+  const kP=total>0?Math.round(kT/total*100):50,rP=100-kP;
+  const dCls=delta>=0?'delta-up':'delta-dn',dArr=delta>=0?'↑':'↓';
+  el.innerHTML=`
+    <div class="hobby-total">${fmt(total)}</div>
+    <div class="hobby-delta">先月比&nbsp;<span class="${dCls}">${dArr}&nbsp;${fmt(Math.abs(delta))}</span></div>
+    <div class="bar-track"><div class="bar-k" style="width:${kP}%"></div><div class="bar-r" style="width:${rP}%"></div></div>
+    <div class="bar-legend">
+      <div class="legend-row"><div class="legend-dot legend-dot-k"></div>けんしん&nbsp;${fmt(kT)}</div>
+      <div class="legend-row"><div class="legend-dot legend-dot-r"></div>れな&nbsp;${fmt(rT)}</div>
+    </div>`;
 }
 
 function renderW8(goals, savingsBalance) {
@@ -990,7 +1047,6 @@ function renderW8(goals, savingsBalance) {
   const catIcons = {travel:'✈️',housing:'🏠',purchase:'🛍️',saving:'💰',event:'🎉',other:'⭐'};
 
   const active = goals
-    .filter(g => g.status === 'active')
     .sort((a, b) => {
       if (a.targetDate && b.targetDate) return a.targetDate.localeCompare(b.targetDate);
       if (a.targetDate) return -1;
@@ -1019,7 +1075,7 @@ function renderW8(goals, savingsBalance) {
       <div class="goal-item">
         <div class="goal-icon">${catIcons[g.category]||'⭐'}</div>
         <div class="goal-body">
-          <div class="goal-name">${g.title||'—'}</div>
+          <div class="goal-name">${esc(g.title||'—')}</div>
           <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
           <div class="goal-meta">
             <span>${target > 0 ? `${fmt(current)} / ${fmt(target)} (${pct}%)` : '金額未設定'}</span>
@@ -1030,23 +1086,6 @@ function renderW8(goals, savingsBalance) {
   }).join('');
 }
 
-function renderW7(logs,ym,pym) {
-  const el=document.getElementById('w7-body');
-  const tl=logs.filter(l=>l.date?.startsWith(ym)),pl=logs.filter(l=>l.date?.startsWith(pym));
-  const kT=tl.filter(l=>l.user==='けんしん').reduce((s,l)=>s+(l.amount||0),0);
-  const rT=tl.filter(l=>l.user==='れな').reduce((s,l)=>s+(l.amount||0),0);
-  const total=kT+rT,prev=pl.reduce((s,l)=>s+(l.amount||0),0),delta=total-prev;
-  const kP=total>0?Math.round(kT/total*100):50,rP=100-kP;
-  const dCls=delta>=0?'delta-up':'delta-dn',dArr=delta>=0?'↑':'↓';
-  el.innerHTML=`
-    <div class="hobby-total">${fmt(total)}</div>
-    <div class="hobby-delta">先月比&nbsp;<span class="${dCls}">${dArr}&nbsp;${fmt(Math.abs(delta))}</span></div>
-    <div class="bar-track"><div class="bar-k" style="width:${kP}%"></div><div class="bar-r" style="width:${rP}%"></div></div>
-    <div class="bar-legend">
-      <div class="legend-row"><div class="legend-dot legend-dot-k"></div>けんしん&nbsp;${fmt(kT)}</div>
-      <div class="legend-row"><div class="legend-dot legend-dot-r"></div>れな&nbsp;${fmt(rT)}</div>
-    </div>`;
-}
 </script>
 </body>
 </html>

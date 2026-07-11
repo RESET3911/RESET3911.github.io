@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7c3aed" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <title>ST APPS ヘルプ</title>
+  <style>
+    :root {
+      --bg:#f5f4fa; --surface:#fff; --border:rgba(0,0,0,0.08);
+      --text:#1e1a2e; --text2:#6b6480; --purple:#7c3aed;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); line-height:1.75; }
+    .page { max-width:720px; margin:0 auto; padding:24px 16px 60px; }
+    h1 { font-size:22px; margin:18px 0 6px; letter-spacing:-0.3px; }
+    .sub { font-size:12px; color:var(--text2); margin-bottom:24px; }
+    .back { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:var(--purple); text-decoration:none; margin-bottom:8px; }
+    section { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 18px 14px; margin-bottom:14px; }
+    h2 { font-size:15px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    h2 a { font-size:11px; font-weight:700; color:var(--purple); text-decoration:none; margin-left:auto; }
+    p, li { font-size:13px; color:var(--text2); }
+    ul { padding-left:18px; margin:6px 0; }
+    b { color:var(--text); }
+    .tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; background:rgba(124,58,237,0.1); color:var(--purple); margin-left:6px; }
+    .note { background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.15); border-radius:12px; padding:12px 14px; font-size:12px; color:var(--text2); margin-bottom:14px; }
+    footer { text-align:center; font-size:11px; color:var(--text2); margin-top:30px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="./">← HUBへ戻る</a>
+  <h1>❓ ST APPS ヘルプ</h1>
+  <div class="sub">最終更新: 2026-07-12 ・ このページが説明書の最新版です（旧 ST_APPS_説明書.txt は廃止）</div>
+
+  <div class="note">
+    🔐 <b>ログインについて</b><br />
+    2026-07 からすべてのアプリで <b>Googleログイン</b> が必要になりました（ふたりのGmailだけが許可されています）。
+    端末ごとに初回1回ログインすれば、以後は自動です。HUBでログインすると、各アプリの「あなたはどっち？」も自動でスキップされます。
+  </div>
+
+  <section>
+    <h2>💰 CASHFLOW <a href="https://RESET3911.github.io/CASHFLOW/">開く →</a></h2>
+    <p>フリーランス収支・経費・税金管理。月次手取り・年間税額シミュレーション、売掛（入金待ち）管理。RINGIで承認された経費が自動で反映される。</p>
+  </section>
+
+  <section>
+    <h2>🧾 SE.TSU <a href="https://RESET3911.github.io/SETSU/">開く →</a></h2>
+    <p>ふたりの家計簿。実支出の記帳・カテゴリ予算・共同財布の50/50割り勘精算。RINGI承認・WISHLIST購入分の取込インボックス、CSVインポート対応。</p>
+  </section>
+
+  <section>
+    <h2>📝 RINGI <a href="https://RESET3911.github.io/RINGI/">開く →</a></h2>
+    <p>購入申請・決裁システム（家庭内稟議）。申請 → 相手が承認/否決/保留/条件付き承認。承認された経費はCASHFLOW・SE.TSUに連携。購入後レビュー機能つき。</p>
+  </section>
+
+  <section>
+    <h2>🛍️ WISHLIST <a href="https://RESET3911.github.io/ST_WISHLIST/">開く →</a></h2>
+    <p>欲しいものリスト。アイテムからワンタップでRINGI申請、承認されるとステータス自動更新。ふたりのアイテム比較画面あり。</p>
+  </section>
+
+  <section>
+    <h2>🧺 STOCK <span class="tag">NEW</span> <a href="https://RESET3911.github.io/STOCK/">開く →</a></h2>
+    <p>買い物リスト＋日用品在庫。「切れそう」「買う」をふたりで共有し、買ったらワンタップでSE.TSUに記帳。定番品は在庫ローテーションで管理。</p>
+  </section>
+
+  <section>
+    <h2>📅 DAYS <a href="https://RESET3911.github.io/DAYS/">開く →</a></h2>
+    <p>共有カレンダー。月/週表示・祝日・記念日カウントダウン・スタンプ・ToDo・テンプレート。CASHFLOWの入金/固定費/税期限、RINGI期限も自動表示。</p>
+  </section>
+
+  <section>
+    <h2>⏱ Sche Queue <a href="https://RESET3911.github.io/SCHE_QUEUE/">開く →</a></h2>
+    <p>Googleカレンダーへの予定一括投入ツール（発車標風UI）。個人のGoogleアカウントで動作。</p>
+  </section>
+
+  <section>
+    <h2>📊 Gantt <a href="https://gantt-tau.vercel.app/">開く →</a></h2>
+    <p>ガントチャート型タスク管理（Vercel）。Googleカレンダー連携。共同作業者向けの公開版は GANTT_PUBLIC。</p>
+  </section>
+
+  <section>
+    <h2>🎯 GOALS <a href="https://RESET3911.github.io/GOALS/">開く →</a></h2>
+    <p>ふたりの目標・貯金ゴール管理。CASHFLOWの貯蓄残高と連携できる。</p>
+  </section>
+
+  <section>
+    <h2>💝 Konomi <a href="https://RESET3911.github.io/KONOMI/">開く →</a></h2>
+    <p>好み相性データベース（好き/まあ好き/苦手/NG/条件付き × 7カテゴリ）。早見表・ごはん提案機能つき。プレゼント・お店選びで外さないための辞書。</p>
+  </section>
+
+  <section>
+    <h2>📒 Hobby Ledger <a href="https://RESET3911.github.io/HOBBY_LEDGER/">開く →</a></h2>
+    <p>趣味の活動時間・支出の記録。ストリーク・月間グラフ・ふたり比較・年間サマリー。</p>
+  </section>
+
+  <section>
+    <h2>🔔 通知のしくみ</h2>
+    <ul>
+      <li><b>HUBのベル</b>: 各アプリからのアプリ内通知（30日で自動削除）</li>
+      <li><b>ntfyプッシュ</b>: スマホの「ntfy」アプリで共有トピックを購読すると即時通知が届く（トピック名はRINGIの設定画面参照）</li>
+      <li><b>週次サマリー</b>: 毎週日曜9時に1週間のまとめが届く</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🛠 技術メモ</h2>
+    <ul>
+      <li>バックエンド: Firebase Firestore（ringi-1b31a）/ ルールはGoogleログイン許可制</li>
+      <li>ユーザーID: <b>kenshin / rena</b> に統一（2026-07-12移行済み。旧 saku/takahashi/A/B は廃止）</li>
+      <li>共通コード: <b>_Claude/ST_SHARED</b> を編集 → <code>node sync.mjs</code> で各アプリへ配布</li>
+      <li>バックアップ・運用スクリプト: <b>_Claude/ST_OPS</b>（<code>npm run backup</code>）</li>
+      <li>デプロイ: 各リポジトリの main へ push → GitHub Actions が自動ビルド・公開</li>
+    </ul>
+  </section>
+
+  <footer>さく &amp; たかはし · ST APPS</footer>
+</div>
+</body>
+</html>
